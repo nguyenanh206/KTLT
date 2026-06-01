@@ -6,13 +6,13 @@ Thành viên C - Vinh
 
 from datetime import datetime
 
-
 def calculateBalance(transaction_list):
     """
-    Duyệt toàn bộ DSLK Giao dịch để tính số dư tích lũy:
-        Số dư = Tổng Thu - Tổng Chi
-
-    Trả về: (balance: float, total_income: float, total_expense: float)
+    Duyệt qua DSLK Giao dịch để tính số dư:
+        Số dư = Tổng thu - Tổng chi
+    
+    Input: DSLK Giao dịch
+    Output: Số dư, Tổng thu, Tổng chi
     """
     total_income = 0.0
     total_expense = 0.0
@@ -25,22 +25,24 @@ def calculateBalance(transaction_list):
         elif t.type == "chi":
             total_expense += t.amount
         current = current.next
-
+    
     balance = total_income - total_expense
+
     return balance, total_income, total_expense
 
 
-def calculateCategoryRatios(transaction_list, month=None, year=None):
+def calculateCategoryRatio(transaction_list, month = None, year = None):
     """
-    Tính tỷ lệ % chi tiêu của từng danh mục trong kỳ (tháng/năm).
-    Nếu month=None thì tính toàn bộ.
+    Tính tỷ lệ % chi tiêu của các danh mục trong kỳ (tháng/năm)
+    Không nhập gì thêm về month và year thì tính toàn bộ
 
-    Trả về: danh sách [(category, amount, percent), ...] sắp xếp giảm dần theo amount.
+    Input: DSLK Giao dịch
+    Output: Tổng chi tiêu và Danh sách với format [(category, amount, percent), ...] giảm dần theo amount
     """
-    # Dùng mảng song song (key-value thủ công, không dùng dict built-in)
+    # 2 mảng song song 
     cat_names = []
     cat_amounts = []
-
+    # Thêm (hoặc cộng thêm) các phần tử trong 2 mảng
     current = transaction_list.head
     while current is not None:
         t = current.data
@@ -53,49 +55,42 @@ def calculateCategoryRatios(transaction_list, month=None, year=None):
                         include = False
                 except ValueError:
                     include = False
-
             if include:
-                # Tìm danh mục có sẵn
                 found = False
                 for i in range(len(cat_names)):
                     if cat_names[i] == t.category:
-                        cat_amounts[i] += t.amount
+                        cat_amounts[i] += t.cat_amounts
                         found = True
                         break
                 if not found:
                     cat_names.append(t.category)
                     cat_amounts.append(t.amount)
-
-        current = current.next
-
     # Tính tổng
     total = 0.0
-    for amt in cat_amounts:
-        total += amt
-
-    # Tạo kết quả và tính %
+    for amount in cat_amounts:
+        total += amount
+    # Tính phần trăm và đưa kết quả vào mảng kết quả
     result = []
     for i in range(len(cat_names)):
-        pct = (cat_amounts[i] / total * 100) if total > 0 else 0.0
-        result.append((cat_names[i], cat_amounts[i], pct))
-
-    # Sắp xếp giảm dần (Bubble Sort thủ công)
+        percent = (cat_amounts[i] / total * 100) if total > 0 else 0.0
+        result.append((cat_names[i], cat_amounts[i], percent))
+    # Sắp xếp giảm dần theo amount (dùng bubble sort)
     n = len(result)
     for i in range(n - 1):
         for j in range(n - 1 - i):
-            if result[j][1] < result[j + 1][1]:
-                result[j], result[j + 1] = result[j + 1], result[j]
+            if result[j][1] < result[j+1][1]:
+                result[j], result[j+1] = result[j+1], result[j]
 
-    return result, total
+    return total, result
 
-
-def searchTransactions(transaction_list, keyword=None, category=None, trans_type=None,
-                        date_from=None, date_to=None):
+def searchTransactions(transaction_list, keyword = None, category = None, trans_type = None,
+                        date_from = None, date_to = None, id = None):
     """
-    Tìm kiếm giao dịch theo nhiều tiêu chí (lọc kết hợp).
-    Tất cả tham số đều tùy chọn.
+    Tìm kiếm giao dịch theo nhiều tiêu chí.
+    Không nhập gì thêm ngoài DSLK thì in toàn bộ các Giao dịch
 
-    Trả về: danh sách các Transaction phù hợp.
+    Input: DSLK Giao dịch, Tiêu chí tìm kiếm
+    Output: Danh sách các Giao dịch thỏa mãn
     """
     results = []
     current = transaction_list.head
@@ -103,21 +98,17 @@ def searchTransactions(transaction_list, keyword=None, category=None, trans_type
     while current is not None:
         t = current.data
         match = True
-
-        # Lọc theo từ khóa (ghi chú hoặc danh mục)
+        # Lọc theo từ khóa (danh mục hoặc ghi chú)
         if keyword:
             kw = keyword.lower()
             if kw not in t.note.lower() and kw not in t.category.lower():
                 match = False
-
         # Lọc theo danh mục
         if category and t.category.lower() != category.lower():
             match = False
-
         # Lọc theo loại (thu/chi)
         if trans_type and t.type != trans_type:
             match = False
-
         # Lọc theo khoảng ngày
         if date_from or date_to:
             try:
@@ -127,24 +118,21 @@ def searchTransactions(transaction_list, keyword=None, category=None, trans_type
                     if t_date < df:
                         match = False
                 if date_to:
-                    dt_end = datetime.strptime(date_to, "%Y-%m-%d")
-                    if t_date > dt_end:
+                    dt = datetime.strptime(date_to, "%Y-%m-%d")
+                    if t.date > dt:
                         match = False
             except ValueError:
                 match = False
-
+        
         if match:
             results.append(t)
 
         current = current.next
 
-    # Sắp xếp theo ngày giảm dần (Insertion Sort)
-    for i in range(1, len(results)):
-        key = results[i]
-        j = i - 1
-        while j >= 0 and results[j].date < key.date:
-            results[j + 1] = results[j]
-            j -= 1
-        results[j + 1] = key
-
+    # Sắp xếp giảm dần theo ngày (Selection sort)
+    for i in range(len(results) - 1):
+        for j in range(i+1, len(results)):
+            if results[i].date < results[j].date:
+                results[i], results[j] = results[j], results[i]
+    
     return results
