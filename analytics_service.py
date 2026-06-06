@@ -4,6 +4,7 @@ Thống kê & Phân tích tài chính: số dư, tỷ lệ chi tiêu, tìm kiế
 Thành viên C - Vinh
 """
 
+from decimal import MAX_PREC
 from datetime import datetime
 
 def calculateBalance(transaction_list):
@@ -31,7 +32,7 @@ def calculateBalance(transaction_list):
     return balance, total_income, total_expense
 
 
-def calculateCategoryRatio(transaction_list, month = None, year = None):
+def calculateCategoryRatios(transaction_list, month = None, year = None):
     """
     Tính tỷ lệ % chi tiêu của các danh mục trong kỳ (tháng/năm)
     Không nhập gì thêm về month và year thì tính toàn bộ
@@ -59,12 +60,13 @@ def calculateCategoryRatio(transaction_list, month = None, year = None):
                 found = False
                 for i in range(len(cat_names)):
                     if cat_names[i] == t.category:
-                        cat_amounts[i] += t.cat_amounts
+                        cat_amounts[i] += t.amount
                         found = True
                         break
                 if not found:
                     cat_names.append(t.category)
                     cat_amounts.append(t.amount)
+        current = current.next
     # Tính tổng
     total = 0.0
     for amount in cat_amounts:
@@ -131,8 +133,11 @@ def searchTransactions(transaction_list, keyword = None, category = None, trans_
 
     # Sắp xếp giảm dần theo ngày (Selection sort)
     for i in range(len(results) - 1):
+        max_idx = i
         for j in range(i+1, len(results)):
-            if results[i].date < results[j].date:
-                results[i], results[j] = results[j], results[i]
+            if results[max_idx].date < results[j].date:
+                max_idx = j
+        if max_idx != i:
+            results[i], results[max_idx] = results[max_idx], results[i]
     
     return results
