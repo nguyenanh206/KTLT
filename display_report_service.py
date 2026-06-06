@@ -146,7 +146,7 @@ def printAllBudgets(budget_list):
 def printSearchResults(results):
     """
     In ra kết quả tìm kiếm giao dịch
-    Input: danh sách các giao dịch thỏa mãn tiêu chí
+    Input: Danh sách các giao dịch thỏa mãn tiêu chí (kết quả trả về của hàm searchTransactions)
     """
     printHeader(f"KẾT QUẢ TÌM KIẾM ({len(results)} giao dịch)")
     if not results:
@@ -166,10 +166,10 @@ def printBalanceSummary(transaction_list):
     """
     balance, total_income, total_expense = calculateBalance(transaction_list)
     printHeader("SỐ DƯ TỔNG THỂ")
-    print(f"  Tổng Thu    : {total_income:>15,,.0f} VND")
-    print(f"  Tổng Chi    : {total_expense:>15,,.0f} VND")
+    print(f"  Tổng Thu    : {total_income:>15,.0f} VND")
+    print(f"  Tổng Chi    : {total_expense:>15,.0f} VND")
     printLine()
     sign = "+" if balance >= 0 else ""
     status = "Dư" if balance >= 0 else "Âm"
-    print(f"  {status:<12}: {sign}{balance:>14,,.0f} VND")
+    print(f"  {status:<12}: {sign}{balance:>14,.0f} VND")
     printLine("=")
