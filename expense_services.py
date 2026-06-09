@@ -3,7 +3,7 @@ import time
 from datetime import datetime
 
 from budget_checker import checkBudgetExceeded
-from models import Budget, Transaction
+from ktlt import Budget, Transaction
 
 
 _id_counter = 0
