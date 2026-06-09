@@ -12,6 +12,7 @@ Cài đặt thư viện:
     pip install customtkinter
 """
 
+import os
 import customtkinter as ctk
 from datetime import datetime
 from tkinter import messagebox
@@ -26,8 +27,9 @@ from expense_services  import addTransactionWithCheck, updateBudget, _generateId
 from budget_checker    import checkBudgetExceeded
 
 # Đường dẫn file dữ liệu
-TRANS_FILE  = "data/transactions.txt"
-BUDGET_FILE = "data/budgets.txt"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TRANS_FILE  = os.path.join(BASE_DIR, "data", "transactions.txt")
+BUDGET_FILE = os.path.join(BASE_DIR, "data", "budgets.txt")
 
 # ──────────────────────────────────────────────────────────────
 #  CẤU HÌNH GIAO DIỆN TOÀN CỤC
@@ -725,7 +727,7 @@ class ExpenseApp(ctk.CTk):
             filter_right,
             values=["Tất cả", "Thu nhập", "Chi tiêu"],
             variable=self._filter_type,
-            command=lambda _: self.refresh_transaction_table(),
+            command=self.refresh_transaction_table,
             font=FONT_BODY, width=120,
             fg_color=CLR_SIDEBAR, button_color=CLR_BLUE,
             dropdown_fg_color=CLR_SIDEBAR)
@@ -753,16 +755,18 @@ class ExpenseApp(ctk.CTk):
         # Lưu độ rộng cột để dùng khi vẽ hàng
         self._col_widths = COL_WIDTHS
 
-    def refresh_transaction_table(self):
+    def refresh_transaction_table(self, selected_filter=None):
         """Xóa và vẽ lại toàn bộ bảng dựa trên bộ lọc hiện tại."""
         # Xóa tất cả widget hàng cũ
         for w in self.table_scroll.winfo_children():
             w.destroy()
 
         # Xác định bộ lọc
+        if selected_filter is None:
+            selected_filter = self._filter_type.get()
         keyword   = self._search_keyword.get().strip().lower() or None
         ftype_map = {"Thu nhập": "thu", "Chi tiêu": "chi", "Tất cả": None}
-        ftype     = ftype_map.get(self._filter_type.get())
+        ftype     = ftype_map.get(selected_filter)
 
         # Lọc bằng hàm backend searchTransactions
         results = searchTransactions(

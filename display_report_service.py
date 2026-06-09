@@ -46,7 +46,7 @@ def generateMonthlyReport(transaction_list, budget_list, month, year):
                 transactions_in_month[i], transactions_in_month[min_idx] = transactions_in_month[min_idx], transactions_in_month[i]
 
     # --- In danh sách giao dịch (đã sắp xếp) cùng tổng tiền thu, chi và số dư
-    print(f"\n{"Ngày":<12} {"Loại":<5} {"Danh mục":<14} {"Số tiền":>14}     {"Ghi chú"}")
+    print(f"\n{'Ngày':<12} {'Loại':<5} {'Danh mục':<14} {'Số tiền':>14}     {'Ghi chú'}")
     printLine()
     total_income = 0.0
     total_expense = 0.0
@@ -63,17 +63,17 @@ def generateMonthlyReport(transaction_list, budget_list, month, year):
         print("     (Không có giao dịch nào trong tháng này)")
 
     printLine()
-    print(f"{"Tổng thu":>43}: {total_income:>14,.0f} VND")
-    print(f"{"Tổng chi":>43}: {total_expense:>14,.0f} VND")
+    print(f"{'Tổng thu':>43}: {total_income:>14,.0f} VND")
+    print(f"{'Tổng chi':>43}: {total_expense:>14,.0f} VND")
     balance = total_income - total_expense
     sign = "+" if balance > 0 else ""
-    print(f"{"Số dư:":>43} {" ":>1} {sign}{balance:>13,.0f} VND")
+    print(f"{'Số dư:':>43} {' ':>1} {sign}{balance:>13,.0f} VND")
 
     # --- In tỷ lệ chi tiêu theo danh mục ---
     print("\n--- TỶ LỆ CHI TIÊU THEO DANH MỤC ---")
     total, ratios = calculateCategoryRatios(transaction_list, month, year)
     if ratios:
-        print(f"{"Danh mục":<18} {"Số tiền":>14} {"Tỷ lệ":>7}")
+        print(f"{'Danh mục':<18} {'Số tiền':>14} {'Tỷ lệ':>7}")
         printLine()
         for cat, amt, pct in ratios:
             print(f"{cat:<18} {amt:>14,.0f} {pct:>6.1f}%")
@@ -133,7 +133,7 @@ def printAllBudgets(budget_list):
     printLine()
     while current is not None:
         b = current.data
-        print(f"{b.id:<12} {b.category:<15} {b.month:02d}/{b.year}      {b.limit:>15,,.0f} VND")
+        print(f"{b.id:<12} {b.category:<15} {b.month:02d}/{b.year}      {b.limit:>15,.0f} VND")
         count += 1
         current = current.next
     printLine()
@@ -156,7 +156,7 @@ def printSearchResults(results):
         printLine()
         for t in results:
             loai = "THU" if t.type == "thu" else "CHI"
-            print(f"{t.id:<12} {t.date:<12} {loai:<5} {t.category:<14} {t.amount:>14,,.0f}  {t.note}")
+            print(f"{t.id:<12} {t.date:<12} {loai:<5} {t.category:<14} {t.amount:>14,.0f}  {t.note}")
     printLine("=")
 
 def printBalanceSummary(transaction_list):

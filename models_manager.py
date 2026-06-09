@@ -108,11 +108,34 @@ class LinkedList:
 
 # ===================== DATA MANAGER =====================
 
-def loadDataFromFile(file_path):
-    """Đọc dữ liệu từ file văn bản, nạp vào Danh sách liên kết"""
+# Default file paths
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+DEFAULT_TRANS_FILE = os.path.join(DATA_DIR, "transactions.txt")
+DEFAULT_BUDGET_FILE = os.path.join(DATA_DIR, "budgets.txt")
+
+def _ensureDataDir():
+    if not os.path.exists(DATA_DIR):
+        os.makedirs(DATA_DIR)
+
+def loadDataFromFile(file_path=None):
+    """
+    Đọc dữ liệu từ file văn bản.
+    - Nếu file_path là None: đọc cả 2 file giao dịch và ngân sách mặc định, trả về (transaction_list, budget_list).
+    - Nếu file_path không None: đọc file đó. Nếu file_path chứa "budget" thì nạp Budget, ngược lại nạp Transaction. Trả về LinkedList.
+    """
+    _ensureDataDir()
+    
+    if file_path is None:
+        transaction_list = loadDataFromFile(DEFAULT_TRANS_FILE)
+        budget_list = loadDataFromFile(DEFAULT_BUDGET_FILE)
+        return transaction_list, budget_list
+
     llist = LinkedList()
     if not os.path.exists(file_path):
-        return llist  # Trả về danh sách trống nếu file chưa tồn tại
+        return llist
+
+    is_budget_file = "budget" in os.path.basename(file_path).lower()
 
     try:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -120,36 +143,73 @@ def loadDataFromFile(file_path):
                 line = line.strip()
                 if not line:
                     continue
-                # Tách chuỗi theo dấu '|'
-                parts = line.split("|")
-                # [SỬA] Cập nhật đọc 6 trường (thêm trans_type)
-                if len(parts) >= 6:
-                    t = Transaction(
-                        trans_id=parts[0],
-                        date=parts[1],
-                        trans_type=parts[2],
-                        amount=int(parts[3]),
-                        category=parts[4],
-                        note=parts[5]
-                    )
-                    llist.addNode(t)
-    except IOError:
-        print("[Lỗi] Không thể đọc file dữ liệu.")
+                parts = [p.strip() for p in line.split("|")]
+                if is_budget_file:
+                    if len(parts) >= 5:
+                        b = Budget(
+                            budget_id=parts[0],
+                            category=parts[1],
+                            limit=float(parts[2]),
+                            month=int(parts[3]),
+                            year=int(parts[4])
+                        )
+                        llist.addNode(b)
+                else:
+                    if len(parts) >= 6:
+                        # Convert amount safely, handling possible float representation like 100000.0
+                        amt = int(float(parts[3]))
+                        t = Transaction(
+                            trans_id=parts[0],
+                            date=parts[1],
+                            trans_type=parts[2],
+                            amount=amt,
+                            category=parts[4],
+                            note=parts[5]
+                        )
+                        llist.addNode(t)
+    except Exception as e:
+        print(f"[Lỗi] Không thể đọc file dữ liệu {file_path}: {e}")
 
     return llist
 
 
-def saveDataToFile(llist, file_path):
-    """Ghi toàn bộ dữ liệu từ Danh sách liên kết xuống file text"""
+def saveDataToFile(arg1, arg2=None):
+    """
+    Ghi toàn bộ dữ liệu xuống file text.
+    Hỗ trợ 2 signature:
+    1. saveDataToFile(transaction_list, budget_list) -> Ghi xuống các file mặc định
+    2. saveDataToFile(llist, file_path) -> Ghi llist xuống file_path
+    """
+    _ensureDataDir()
+    
+    # Signature 1: saveDataToFile(transaction_list, budget_list)
+    if arg2 is None or isinstance(arg2, LinkedList):
+        transaction_list = arg1
+        budget_list = arg2 if arg2 is not None else LinkedList()
+        ok1 = saveDataToFile(transaction_list, DEFAULT_TRANS_FILE)
+        ok2 = saveDataToFile(budget_list, DEFAULT_BUDGET_FILE)
+        return ok1 and ok2
+
+    # Signature 2: saveDataToFile(llist, file_path)
+    llist = arg1
+    file_path = arg2
+    
+    is_budget_file = "budget" in os.path.basename(file_path).lower()
+    
     try:
         with open(file_path, "w", encoding="utf-8") as file:
             current = llist.head
             while current is not None:
                 d = current.data
-                # [SỬA] Ghi thêm trường type vào file
-                line = f"{d.id}|{d.date}|{d.type}|{d.amount}|{d.category}|{d.note}\n"
+                if is_budget_file:
+                    # Budget format: id|category|limit|month|year
+                    line = f"{d.id}|{d.category}|{d.limit}|{d.month}|{d.year}\n"
+                else:
+                    # Transaction format: id|date|type|amount|category|note
+                    line = f"{d.id}|{d.date}|{d.type}|{d.amount}|{d.category}|{d.note}\n"
                 file.write(line)
                 current = current.next
         return True
-    except IOError:
+    except Exception as e:
+        print(f"[Lỗi] Không thể ghi file dữ liệu {file_path}: {e}")
         return False

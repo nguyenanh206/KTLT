@@ -104,7 +104,7 @@ def inputTransaction():
             print("  Ngay khong hop le.")
 
     note = input("Ghi chu: ").strip()
-    return Transaction(_generateId("T"), amount, category, trans_type, date, note)
+    return Transaction(trans_id=_generateId("T"), date=date, trans_type=trans_type, amount=amount, category=category, note=note)
 
 
 def modifyTransaction(transaction_list, trans_id):

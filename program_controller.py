@@ -37,7 +37,7 @@ def run():
     """Hàm chính điều hướng toàn bộ chương trình"""
     print("\n  Đang nạp dữ liệu từ file...")
     transaction_list, budget_list = loadDataFromFile()
-    print(f"  ✓ Đã nạp {transaction_list.size()} giao dịch và {budget_list.size()} ngân sách.")
+    print(f"  ✓ Đã nạp {transaction_list.count()} giao dịch và {budget_list.count()} ngân sách.")
 
     while True:
         choice = displayMainMenu()
