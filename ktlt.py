@@ -1,78 +1,82 @@
-Python 3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)] on win32
-Enter "help" below or click "Help" above for more information.
->>> import os
-... 
-... # ===================== MODELS =====================
-... class Transaction:
-...     """Đối tượng lưu thông tin một khoản Thu/Chi"""
-...     def __init__(self, trans_id, date, amount, category, note=""):
-...         self.id = trans_id          # Mã giao dịch
-...         self.date = date            # Ngày (YYYY-MM-DD)
-...         self.amount = int(amount)   # Số tiền (Kiểu số nguyên)
-...         self.category = category    # Danh mục
-...         self.note = note            # Ghi chú
-... 
-... class Node:
-...     """Nút của danh sách liên kết đơn"""
-...     def __init__(self, data):
-...         self.data = data    # Dữ liệu (Transaction)
-...         self.next = None    # Con trỏ đến nút tiếp theo
-... 
-... 
-... # ===================== EXPENSE SERVICES =====================
-... class LinkedList:
-...     def __init__(self):
-...         self.head = None
-... 
-...     def addNode(self, newData: Transaction):
-...         """Thêm một nút mới vào cuối danh sách"""
-...         new_node = Node(newData)
-...         if self.head is None:
-...             self.head = new_node
-...             return
-...         
-...         temp = self.head
-...         while temp.next is not None:
-...             temp = temp.next
-...         temp.next = new_node
-... 
-...     def deleteNode(self, trans_id: str) -> bool:
+
+import os
+
+# ===================== MODELS =====================
+
+class Transaction:
+    """Đối tượng lưu thông tin một khoản Thu/Chi"""
+    # [SỬA] Thêm trường `trans_type` (thu/chi) vào __init__
+    # Thiếu trường này khiến checkBudgetExceeded() và calculateBalance()
+    # báo AttributeError khi truy cập t.type
+    # [SỬA] Đổi thứ tự tham số thành (id, date, trans_type, amount, category, note)
+    # để thống nhất với cách dùng ở các module khác
+    def __init__(self, trans_id, date, trans_type, amount, category, note=""):
+        self.id = trans_id          # Mã giao dịch
+        self.date = date            # Ngày (YYYY-MM-DD)
+        self.type = trans_type      # Loại: "thu" hoặc "chi"  <- THÊM MỚI
+        self.amount = int(amount)   # Số tiền (kiểu số nguyên)
+        self.category = category    # Danh mục
+        self.note = note            # Ghi chú
+
+
+class Node:
+    """Nút của danh sách liên kết đơn"""
+    def __init__(self, data):
+        self.data = data    # Dữ liệu (Transaction)
+        self.next = None    # Con trỏ đến nút tiếp theo
+
+
+# ===================== EXPENSE SERVICES =====================
+
+class LinkedList:
+    """Danh sách liên kết đơn quản lý các giao dịch"""
+    def __init__(self):
+        self.head = None
+
+    def addNode(self, newData):
+        """Thêm một nút mới vào cuối danh sách"""
+        new_node = Node(newData)
+        if self.head is None:
+            self.head = new_node
+            return
+        temp = self.head
+        while temp.next is not None:
+            temp = temp.next
+        temp.next = new_node
+
+    def deleteNode(self, trans_id):
         """Xóa nút theo mã ID. Trả về True nếu thành công, False nếu không tìm thấy"""
         if self.head is None:
             return False
 
-        temp = self.head
-        prev = None
-
         # Trường hợp xóa nút đầu
-        if temp is not None and temp.data.id == trans_id:
-            self.head = temp.next
+        if self.head.data.id == trans_id:
+            self.head = self.head.next
             return True
 
         # Tìm nút cần xóa ở giữa hoặc cuối
-        while temp is not None and temp.data.id != trans_id:
-            prev = temp
+        temp = self.head
+        while temp.next is not None:
+            if temp.next.data.id == trans_id:
+                temp.next = temp.next.next
+                return True
             temp = temp.next
 
-        if temp is None:
-            return False
-
-        prev.next = temp.next
-        return True
+        return False
 
     def printList(self):
         """Duyệt và in toàn bộ danh sách giao dịch"""
         if self.head is None:
-            print("Danh sach giao dich trong!")
+            print("Danh sách giao dịch trống!")
             return
-        
-        print("\n--- DANH SACH GIAO DICH ---")
+        print("\n--- DANH SÁCH GIAO DỊCH ---")
         current = self.head
         while current is not None:
-            print(f"ID: {current.data.id} | Ngay: {current.data.date} | "
-                  f"Sotien: {current.data.amount} | Danh muc: {current.data.category} | "
-                  f"Ghi chu: {current.data.note}")
+            t = current.data
+            print(f"ID: {t.id} | Ngày: {t.date} | Loại: {t.type} | "
+                  f"Số tiền: {t.amount:,} | Danh mục: {t.category} | Ghi chú: {t.note}")
             current = current.next
+
 
 
 # ===================== DATA MANAGER =====================
@@ -91,13 +95,15 @@ def loadDataFromFile(file_path: str) -> LinkedList:
                 
                 # Tách chuỗi theo dấu '|' tương tự sstream/getline trong C++
                 parts = line.split("|")
-                if len(parts) >= 5:
+                #Sửa: cập nhật đọc 6 trương
+                if len(parts) >= 6:
                     t = Transaction(
                         trans_id=parts[0],
                         date=parts[1],
-                        amount=int(parts[2]),
-                        category=parts[3],
-                        note=parts[4]
+                        trans_type = part[2],
+                        amount=int(parts[3]),
+                        category=parts[4],
+                        note=parts[5]
                     )
                     llist.addNode(t)
     except IOError:
@@ -111,7 +117,8 @@ def saveDataToFile(llist: LinkedList, file_path: str) -> bool:
         with open(file_path, "w", encoding="utf-8") as file:
             current = llist.head
             while current is not None:
-                line = f"{current.data.id}|{current.data.date}|{current.data.amount}|{current.data.category}|{current.data.note}\n"
+                #thêm trường type vào file
+                line = f"{current.data.id}|{current.data.date}|{current.data.type}|{current.data.amount}|{current.data.category}|{current.data.note}\n"
                 file.write(line)
                 current = current.next
         return True
@@ -157,7 +164,14 @@ def main():
             print("\n--- THEM GIAO DICH MOI ---")
             trans_id = input("Nhap ma giao dich (ID): ").strip()
             date = input("Nhap ngay (YYYY-MM-DD): ").strip()
-            
+                
+                #Thêm nhập loại giao dịch (thu/chi)
+            while True:
+                trans_type = input("Loại giao dịch (thu/chi): ").strip().lower()
+                if trans_type in ("thu", "chi"):
+                    break
+                print("  Vui lòng nhập 'thu' hoặc 'chi'.")
+                    
             try:
                 amount = int(input("Nhap so tien: ").strip())
             except ValueError:
@@ -167,7 +181,7 @@ def main():
             category = input("Nhap danh muc: ").strip()
             note = input("Nhap ghi chu: ").strip()
             
-            newT = Transaction(trans_id, date, amount, category, note)
+            newT = Transaction(trans_id, date, trans_type, amount, category, note)
             listTransaction.addNode(newT)
             print("✓ Da them vao bo nho tam.")
             
@@ -195,3 +209,4 @@ def main():
 
 
 if __name__ == "__main__":
+        main()
