@@ -1,166 +1,188 @@
-"""
-Module 3: expense_services.py
-Xử lý Giao dịch & Nghiệp vụ cốt lõi: Thêm/Xóa/Sửa giao dịch, Quản lý ngân sách
-Thành viên B - Hà Anh
-"""
-
-import uuid
+import os
+import time
 from datetime import datetime
-from models import Transaction, Budget
+
 from budget_checker import checkBudgetExceeded
+from models import Budget, Transaction
+
+
+_id_counter = 0
 
 
 def _generateId(prefix="T"):
-    """Sinh mã định danh ngắn duy nhất"""
-    return prefix + str(uuid.uuid4())[:8].upper()
+    global _id_counter
+    _id_counter += 1
+    try:
+        ts = time.time_ns()
+    except AttributeError:
+        ts = int(time.time() * 1_000_000)
+
+    raw = ts ^ (os.getpid() << 17) ^ (_id_counter * 2654435761)
+    return prefix + format(raw & 0xFFFFFFFF, "08X")
+
+
+def _categoryByNumber(raw):
+    if raw == "1":
+        return "An uong"
+    if raw == "2":
+        return "Di lai"
+    if raw == "3":
+        return "Hoc tap"
+    if raw == "4":
+        return "Giai tri"
+    if raw == "5":
+        return "Y te"
+    if raw == "6":
+        return "Tien nha"
+    if raw == "7":
+        return "Luong"
+    if raw == "8":
+        return "Phu cap"
+    if raw == "9":
+        return "Khac"
+    return None
 
 
 def inputTransaction():
-    """
-    Nhập liệu giao dịch từ bàn phím.
-    Trả về: đối tượng Transaction hoặc None nếu người dùng huỷ.
-    """
-    print("\n--- NHẬP GIAO DỊCH MỚI ---")
-    print("(Nhập 0 để huỷ)")
+    print("\n--- NHAP GIAO DICH MOI ---")
+    print("(Nhap 0 de huy)")
 
-    # Loại giao dịch
-    print("Loại giao dịch: 1 = Thu nhập | 2 = Chi tiêu")
     while True:
-        choice = input("Chọn (1/2): ").strip()
+        choice = input("Loai giao dich (1 = Thu, 2 = Chi): ").strip()
         if choice == "0":
             return None
         if choice in ("1", "2"):
             trans_type = "thu" if choice == "1" else "chi"
             break
-        print("  Vui lòng chọn 1 hoặc 2.")
+        print("  Vui long chon 1 hoac 2.")
 
-    # Số tiền
     while True:
-        raw = input("Số tiền (VND): ").strip()
+        raw = input("So tien (VND): ").strip()
         if raw == "0":
             return None
         try:
-            amount = float(raw.replace(",", "").replace(".", ""))
-            if amount <= 0:
-                print("  Số tiền phải lớn hơn 0.")
-                continue
-            break
+            amount = float(raw.replace(",", ""))
+            if amount > 0:
+                break
         except ValueError:
-            print("  Số tiền không hợp lệ, vui lòng nhập lại.")
+            pass
+        print("  So tien khong hop le.")
 
-    # Danh mục
-    CATEGORIES = ["An uong", "Di lai", "Hoc tap", "Giai tri", "Y te", "Tien nha", "Luong", "Phu cap", "Khac"]
-    print("Danh mục:")
-    for i, cat in enumerate(CATEGORIES, 1):
-        print(f"  {i}. {cat}")
+    print("Danh muc:")
+    print("  1. An uong")
+    print("  2. Di lai")
+    print("  3. Hoc tap")
+    print("  4. Giai tri")
+    print("  5. Y te")
+    print("  6. Tien nha")
+    print("  7. Luong")
+    print("  8. Phu cap")
+    print("  9. Khac")
     while True:
-        raw = input("Chọn số hoặc nhập tên danh mục: ").strip()
+        raw = input("Chon so hoac nhap ten danh muc: ").strip()
         if raw == "0":
             return None
-        if raw.isdigit() and 1 <= int(raw) <= len(CATEGORIES):
-            category = CATEGORIES[int(raw) - 1]
+        category = _categoryByNumber(raw)
+        if category is not None:
             break
-        elif len(raw) >= 2:
+        if len(raw) >= 2:
             category = raw.capitalize()
             break
-        print("  Vui lòng chọn hợp lệ.")
+        print("  Danh muc khong hop le.")
 
-    # Ngày
+    today = datetime.today().strftime("%Y-%m-%d")
     while True:
-        raw = input(f"Ngày (YYYY-MM-DD) [Enter = hôm nay {datetime.today().strftime('%Y-%m-%d')}]: ").strip()
+        raw = input(f"Ngay (YYYY-MM-DD) [Enter = {today}]: ").strip()
         if raw == "":
-            date = datetime.today().strftime("%Y-%m-%d")
+            date = today
             break
         try:
             datetime.strptime(raw, "%Y-%m-%d")
             date = raw
             break
         except ValueError:
-            print("  Ngày không hợp lệ. Định dạng: YYYY-MM-DD")
+            print("  Ngay khong hop le.")
 
-    note = input("Ghi chú (có thể để trống): ").strip()
-
-    trans_id = _generateId("T")
-    return Transaction(trans_id, amount, category, trans_type, date, note)
+    note = input("Ghi chu: ").strip()
+    return Transaction(_generateId("T"), amount, category, trans_type, date, note)
 
 
 def modifyTransaction(transaction_list, trans_id):
-    """
-    Tìm giao dịch theo mã và cho phép thay đổi số tiền, danh mục, ghi chú.
-    Trả về True nếu sửa thành công, False nếu không tìm thấy.
-    """
     t = transaction_list.findById(trans_id)
     if t is None:
-        print(f"  Không tìm thấy giao dịch mã: {trans_id}")
+        print(f"  Khong tim thay giao dich ma: {trans_id}")
         return False
 
-    print(f"\n--- SỬA GIAO DỊCH [{trans_id}] ---")
-    print(f"  Loại  : {t.type.upper()}")
-    print(f"  Số tiền: {t.amount:,.0f} VND")
-    print(f"  Danh mục: {t.category}")
-    print(f"  Ngày  : {t.date}")
-    print(f"  Ghi chú: {t.note}")
-    print("(Enter để giữ nguyên giá trị cũ)")
+    print(f"\n--- SUA GIAO DICH [{trans_id}] ---")
+    print("(Enter de giu nguyen gia tri cu)")
 
-    raw = input(f"Số tiền mới [{t.amount:,.0f}]: ").strip()
+    raw = input(f"Loai moi (thu/chi) [{t.type}]: ").strip().lower()
+    if raw in ("thu", "chi"):
+        t.type = raw
+
+    raw = input(f"So tien moi [{t.amount:,.0f}]: ").strip()
     if raw:
         try:
-            new_amount = float(raw.replace(",", ""))
-            if new_amount > 0:
-                t.amount = new_amount
+            amount = float(raw.replace(",", ""))
+            if amount > 0:
+                t.amount = amount
         except ValueError:
-            print("  Giá trị không hợp lệ, giữ số tiền cũ.")
+            print("  So tien khong hop le, giu gia tri cu.")
 
-    raw = input(f"Danh mục mới [{t.category}]: ").strip()
+    raw = input(f"Danh muc moi [{t.category}]: ").strip()
     if raw:
         t.category = raw.capitalize()
 
-    raw = input(f"Ghi chú mới [{t.note}]: ").strip()
+    raw = input(f"Ngay moi [{t.date}]: ").strip()
+    if raw:
+        try:
+            datetime.strptime(raw, "%Y-%m-%d")
+            t.date = raw
+        except ValueError:
+            print("  Ngay khong hop le, giu gia tri cu.")
+
+    raw = input(f"Ghi chu moi [{t.note}]: ").strip()
     if raw:
         t.note = raw
 
-    print("  Giao dịch đã được cập nhật.")
+    print("  Giao dich da duoc cap nhat.")
     return True
 
 
 def updateBudget(budget_list, category, limit, month, year):
-    """
-    Thiết lập hoặc sửa đổi hạn mức chi tiêu cho một danh mục/tháng/năm.
-    Nếu đã tồn tại → cập nhật. Nếu chưa → thêm mới.
-    Trả về budget_list đã cập nhật.
-    """
+    category = category.strip().capitalize()
+    limit = float(limit)
+    month = int(month)
+    year = int(year)
+
     current = budget_list.head
     while current is not None:
         b = current.data
-        if b.category == category and b.month == month and b.year == year:
+        if b.category.lower() == category.lower() and b.month == month and b.year == year:
             b.limit = limit
-            print(f"  Đã cập nhật ngân sách: {category} tháng {month}/{year} = {limit:,.0f} VND")
+            print(f"  Da cap nhat ngan sach: {category} {month:02d}/{year} = {limit:,.0f} VND")
             return budget_list
         current = current.next
 
-    # Chưa tồn tại → thêm mới
-    budget_id = _generateId("B")
-    new_budget = Budget(budget_id, category, limit, month, year)
-    budget_list.addNode(new_budget)
-    print(f"  Đã thêm ngân sách mới: {category} tháng {month}/{year} = {limit:,.0f} VND")
+    budget_list.addNode(Budget(_generateId("B"), category, limit, month, year))
+    print(f"  Da them ngan sach moi: {category} {month:02d}/{year} = {limit:,.0f} VND")
     return budget_list
 
 
 def addTransactionWithCheck(transaction_list, budget_list, t):
-    """
-    Thêm giao dịch vào DSLK, có kiểm tra vượt ngân sách trước.
-    Luôn thêm vào dù có vượt hay không (chỉ cảnh báo).
-    """
+    if t is None:
+        return transaction_list
+
     if t.type == "chi":
         exceeded, spent, budget_limit = checkBudgetExceeded(transaction_list, budget_list, t)
         if exceeded:
-            print(f"\n  ⚠️  CẢNH BÁO VƯỢT HẠN MỨC!")
-            print(f"     Danh mục : {t.category}")
-            print(f"     Đã tiêu  : {spent:,.0f} VND")
-            print(f"     Hạn mức  : {budget_limit:,.0f} VND")
-            print(f"     Khoản mới: {t.amount:,.0f} VND")
-            print(f"     Tổng sẽ là: {spent + t.amount:,.0f} VND (vượt {spent + t.amount - budget_limit:,.0f} VND)\n")
+            total_after = spent + t.amount
+            print("\n  CANH BAO VUOT HAN MUC!")
+            print(f"  Danh muc : {t.category}")
+            print(f"  Da chi   : {spent:,.0f} VND")
+            print(f"  Han muc  : {budget_limit:,.0f} VND")
+            print(f"  Sau them : {total_after:,.0f} VND")
 
     transaction_list.addNode(t)
-    print(f"  ✓ Đã thêm giao dịch [{t.id}]: {t.type.upper()} {t.amount:,.0f} VND - {t.category}")
+    print(f"  Da them giao dich [{t.id}]: {t.type.upper()} {t.amount:,.0f} VND - {t.category}")
     return transaction_list
