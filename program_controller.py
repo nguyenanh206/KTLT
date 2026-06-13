@@ -1,8 +1,3 @@
-"""
-Module 7: program_controller.py
-Xây dựng giao diện Menu dòng lệnh và điều phối các tác vụ.
-Thành viên A - Quang Anh
-"""
 
 from datetime import datetime
 from models_manager import loadDataFromFile, saveDataToFile
@@ -15,7 +10,8 @@ from display_report_service import (
 
 
 def displayMainMenu():
-    """Hiển thị menu chính và nhận lựa chọn"""
+    #Hiển thị menu chính và nhận lựa chọn
+    
     print("\n" + "=" * 62)
     print("       QUẢN LÝ CHI TIÊU CÁ NHÂN - v1.0")
     print("=" * 62)
@@ -34,7 +30,6 @@ def displayMainMenu():
 
 
 def run():
-    """Hàm chính điều hướng toàn bộ chương trình"""
     print("\n  Đang nạp dữ liệu từ file...")
     transaction_list, budget_list = loadDataFromFile()
     print(f"  ✓ Đã nạp {transaction_list.count()} giao dịch và {budget_list.count()} ngân sách.")
@@ -42,7 +37,7 @@ def run():
     while True:
         choice = displayMainMenu()
 
-        # ── 1. THÊM GIAO DỊCH ──────────────────────────────────
+        # 1. THÊM GIAO DỊCH
         if choice == "1":
             t = inputTransaction()
             if t:
@@ -51,7 +46,7 @@ def run():
                 if ok:
                     print("  ✓ Đã lưu dữ liệu.")
 
-        # ── 2. XEM / TÌM KIẾM ──────────────────────────────────
+        # 2. XEM / TÌM KIẾM
         elif choice == "2":
             print("\n--- TÌM KIẾM GIAO DỊCH ---")
             print("  (Để trống và Enter để liệt kê tất cả)")
@@ -64,14 +59,14 @@ def run():
             results = searchTransactions(transaction_list, keyword, cat, ttype, df, dt_end)
             printSearchResults(results)
 
-        # ── 3. SỬA GIAO DỊCH ───────────────────────────────────
+        # 3. SỬA GIAO DỊCH 
         elif choice == "3":
             tid = input("\n  Nhập mã giao dịch cần sửa: ").strip().upper()
             if modifyTransaction(transaction_list, tid):
                 saveDataToFile(transaction_list, budget_list)
                 print("  ✓ Đã lưu thay đổi.")
 
-        # ── 4. XÓA GIAO DỊCH ───────────────────────────────────
+        # 4. XÓA GIAO DỊCH 
         elif choice == "4":
             tid = input("\n  Nhập mã giao dịch cần xóa: ").strip().upper()
             t = transaction_list.findById(tid)
@@ -84,7 +79,7 @@ def run():
             else:
                 print(f"  Không tìm thấy giao dịch mã: {tid}")
 
-        # ── 5. ĐẶT NGÂN SÁCH ───────────────────────────────────
+        #  5. TẠO NGÂN SÁCH 
         elif choice == "5":
             print("\n--- ĐẶT NGÂN SÁCH DANH MỤC ---")
             category = input("  Tên danh mục: ").strip().capitalize()
@@ -105,15 +100,15 @@ def run():
             except (ValueError, AttributeError):
                 print("  Dữ liệu không hợp lệ.")
 
-        # ── 6. XEM NGÂN SÁCH ───────────────────────────────────
+        #  6. XEM NGÂN SÁCH
         elif choice == "6":
             printAllBudgets(budget_list)
 
-        # ── 7. SỐ DƯ TỔNG THỂ ──────────────────────────────────
+        #  7. XEM SỐ DƯ TỔNG THỂ
         elif choice == "7":
             printBalanceSummary(transaction_list)
 
-        # ── 8. BÁO CÁO THÁNG ───────────────────────────────────
+        # 8. BÁO CÁO TRONG THÁNG
         elif choice == "8":
             try:
                 raw_month = input(f"\n  Tháng [{datetime.today().month}]: ").strip()
@@ -126,7 +121,7 @@ def run():
             except ValueError:
                 print("  Tháng/Năm không hợp lệ.")
 
-        # ── 0. THOÁT ────────────────────────────────────────────
+        # 0. THOÁT 
         elif choice == "0":
             print("\n  Đang lưu dữ liệu lần cuối...")
             saveDataToFile(transaction_list, budget_list)
