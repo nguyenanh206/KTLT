@@ -1,20 +1,8 @@
-"""
-Module 5: analytics_service.py
-Thống kê & Phân tích tài chính: số dư, tỷ lệ chi tiêu, tìm kiếm giao dịch.
-Thành viên C - Vinh
-"""
 
 from decimal import MAX_PREC
 from datetime import datetime
 
 def calculateBalance(transaction_list):
-    """
-    Duyệt qua DSLK Giao dịch để tính số dư:
-        Số dư = Tổng thu - Tổng chi
-    
-    Input: DSLK Giao dịch
-    Output: Số dư, Tổng thu, Tổng chi
-    """
     total_income = 0.0
     total_expense = 0.0
 
@@ -33,17 +21,9 @@ def calculateBalance(transaction_list):
 
 
 def calculateCategoryRatios(transaction_list, month = None, year = None):
-    """
-    Tính tỷ lệ % chi tiêu của các danh mục trong kỳ (tháng/năm)
-    Không nhập gì thêm về month và year thì tính toàn bộ
-
-    Input: DSLK Giao dịch
-    Output: Tổng chi tiêu và Danh sách với format [(category, amount, percent), ...] giảm dần theo amount
-    """
-    # 2 mảng song song 
     cat_names = []
     cat_amounts = []
-    # Thêm (hoặc cộng thêm) các phần tử trong 2 mảng
+
     current = transaction_list.head
     while current is not None:
         t = current.data
@@ -87,13 +67,6 @@ def calculateCategoryRatios(transaction_list, month = None, year = None):
 
 def searchTransactions(transaction_list, keyword = None, category = None, trans_type = None,
                         date_from = None, date_to = None, id = None):
-    """
-    Tìm kiếm giao dịch theo nhiều tiêu chí.
-    Không nhập gì thêm ngoài DSLK thì in toàn bộ các Giao dịch
-
-    Input: DSLK Giao dịch, Tiêu chí tìm kiếm
-    Output: Danh sách các Giao dịch thỏa mãn
-    """
     results = []
     current = transaction_list.head
 
