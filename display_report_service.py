@@ -1,9 +1,3 @@
-"""
-Module 6: display_report_service.py
-Định dạng và in bảng báo cáo tổng hợp định kỳ.
-Thành viên C - Vinh
-"""
-
 from datetime import datetime
 from analytics_service import calculateBalance, calculateCategoryRatios
 
@@ -16,14 +10,9 @@ def printHeader(title):
     printLine("=")
 
 def generateMonthlyReport(transaction_list, budget_list, month, year):
-    """
-    Liệt kê các khoản thu chi và danh mục vượt Ngân sách trong tháng
-    Input: DSLK Giao dịch, DSLK Ngân sách, tháng, năm
-    In bảng biểu báo cáo thu chi ra màn hình
-    """
     printHeader(f"BÁO CÁO THÁNG {month:02d}/{year}")
 
-    # --- Lọc giao dịch trong tháng ---
+    #  Lọc giao dịch trong tháng 
     transactions_in_month = []
     current = transaction_list.head
     while current is not None:
@@ -45,7 +34,7 @@ def generateMonthlyReport(transaction_list, budget_list, month, year):
             if min_idx != i:
                 transactions_in_month[i], transactions_in_month[min_idx] = transactions_in_month[min_idx], transactions_in_month[i]
 
-    # --- In danh sách giao dịch (đã sắp xếp) cùng tổng tiền thu, chi và số dư
+    # In danh sách giao dịch (đã sắp xếp) cùng tổng tiền thu, chi và số dư
     print(f"\n{'Ngày':<12} {'Loại':<5} {'Danh mục':<14} {'Số tiền':>14}     {'Ghi chú'}")
     printLine()
     total_income = 0.0
@@ -69,7 +58,7 @@ def generateMonthlyReport(transaction_list, budget_list, month, year):
     sign = "+" if balance > 0 else ""
     print(f"{'Số dư:':>43} {' ':>1} {sign}{balance:>13,.0f} VND")
 
-    # --- In tỷ lệ chi tiêu theo danh mục ---
+    #  In tỷ lệ chi tiêu theo danh mục
     print("\n--- TỶ LỆ CHI TIÊU THEO DANH MỤC ---")
     total, ratios = calculateCategoryRatios(transaction_list, month, year)
     if ratios:
@@ -80,7 +69,7 @@ def generateMonthlyReport(transaction_list, budget_list, month, year):
     else:
         print("     (Không có dữ liệu về chi tiêu)")
 
-    # --- In các mục vượt ngân sách
+    #  In các mục vượt ngân sách
     print("\n--- CẢNH BÁO VƯỢT NGÂN SÁCH ---")
     exceeded = False
 
@@ -122,10 +111,7 @@ def generateMonthlyReport(transaction_list, budget_list, month, year):
     printLine("=")
 
 def printAllBudgets(budget_list):
-    """
-    In ra toàn bộ ngân sách đã đặt
-    Input: DSLK Ngân sách
-    """
+
     printHeader("DANH SÁCH NGÂN SÁCH ĐÃ ĐẶT")
     current = budget_list.head
     count = 0
@@ -144,10 +130,7 @@ def printAllBudgets(budget_list):
 
 
 def printSearchResults(results):
-    """
-    In ra kết quả tìm kiếm giao dịch
-    Input: Danh sách các giao dịch thỏa mãn tiêu chí (kết quả trả về của hàm searchTransactions)
-    """
+
     printHeader(f"KẾT QUẢ TÌM KIẾM ({len(results)} giao dịch)")
     if not results:
         print("  Không tìm thấy giao dịch phù hợp.")
@@ -160,10 +143,7 @@ def printSearchResults(results):
     printLine("=")
 
 def printBalanceSummary(transaction_list):
-    """
-    In ra số dư tổng thể
-    Input: DSLK Giao dịch
-    """
+
     balance, total_income, total_expense = calculateBalance(transaction_list)
     printHeader("SỐ DƯ TỔNG THỂ")
     print(f"  Tổng Thu    : {total_income:>15,.0f} VND")
