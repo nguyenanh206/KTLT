@@ -1,26 +1,20 @@
 import os
 
-# ===================== MODELS =====================
+# MODELS
 
 class Transaction:
-    """Đối tượng lưu thông tin một khoản Thu/Chi"""
-    # [SỬA] Thêm trường `trans_type` (thu/chi) vào __init__
-    # Thiếu trường này khiến checkBudgetExceeded() và calculateBalance()
-    # báo AttributeError khi truy cập t.type
-    # [SỬA] Đổi thứ tự tham số thành (id, date, trans_type, amount, category, note)
-    # để thống nhất với cách dùng ở các module khác
+    
     def __init__(self, trans_id, date, trans_type, amount, category, note=""):
         self.id = trans_id          # Mã giao dịch
         self.date = date            # Ngày (YYYY-MM-DD)
-        self.type = trans_type      # Loại: "thu" hoặc "chi"  <- THÊM MỚI
+        self.type = trans_type      # Loại: "thu" hoặc "chi"  
         self.amount = int(amount)   # Số tiền (kiểu số nguyên)
         self.category = category    # Danh mục
         self.note = note            # Ghi chú
 
-#Thêm đối tượng Budget để quản lý ngân sách theo danh mục/tháng/năm, phục vụ tính năng checkBudgetExceeded() và báo cáo ngân sách
-class Budget:
-    """Ngan sach chi tieu theo danh muc/thang/nam."""
 
+class Budget:
+    #Ngan sach chi tieu theo danh muc/thang/nam
     def __init__(self, budget_id, category, limit, month, year):
         self.id = str(budget_id).strip()
         self.category = str(category).strip()
@@ -29,7 +23,7 @@ class Budget:
         self.year = int(year)
 
 class Node:
-    """Nút của danh sách liên kết đơn"""
+    # Nút của danh sách liên kết đơn
     def __init__(self, data):
         self.data = data    # Dữ liệu (Transaction)
         self.next = None    # Con trỏ đến nút tiếp theo
@@ -38,7 +32,7 @@ class Node:
 # ===================== EXPENSE SERVICES =====================
 
 class LinkedList:
-    """Danh sách liên kết đơn quản lý các giao dịch"""
+    #Danh sách liên kết đơn quản lý các giao dịch
     def __init__(self):
         self.head = None
 
@@ -54,7 +48,7 @@ class LinkedList:
         temp.next = new_node
 
     def deleteNode(self, trans_id):
-        """Xóa nút theo mã ID. Trả về True nếu thành công, False nếu không tìm thấy"""
+        #Xóa nút theo mã ID.
         if self.head is None:
             return False
 
@@ -72,7 +66,7 @@ class LinkedList:
             temp = temp.next
 
         return False
-    #Thêm phương thức tìm kiếm giao dịch theo ID, phục vụ tính năng sửa giao dịch và checkBudgetExceeded()
+    #Thêm phương thức tìm kiếm giao dịch theo ID
     def findById(self, item_id):
         current = self.head
         while current is not None:
@@ -80,7 +74,7 @@ class LinkedList:
                 return current.data
             current = current.next
         return None
-    #thêm phương thức đếm số lượng giao dịch, phục vụ tính năng thống kê số lượng giao dịch
+    #thêm phương thức đếm số lượng giao dịch
     def count(self):
         total = 0
         current = self.head
@@ -88,12 +82,12 @@ class LinkedList:
             total += 1
             current = current.next
         return total
-    #Thêm phương thức kiểm tra danh sách có rỗng hay không, phục vụ tính năng hiển thị thông báo khi danh sách trống
+    #Thêm phương thức kiểm tra danh sách có rỗng hay không
     def isEmpty(self):
         return self.head is None
     
     def printList(self):
-        """Duyệt và in toàn bộ danh sách giao dịch"""
+        #Duyệt và in toàn bộ danh sách giao dịch
         if self.head is None:
             print("Danh sách giao dịch trống!")
             return
@@ -106,9 +100,8 @@ class LinkedList:
             current = current.next
 
 
-# ===================== DATA MANAGER =====================
+#DATA MANAGER 
 
-# Default file paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 DEFAULT_TRANS_FILE = os.path.join(DATA_DIR, "transactions.txt")
@@ -119,11 +112,7 @@ def _ensureDataDir():
         os.makedirs(DATA_DIR)
 
 def loadDataFromFile(file_path=None):
-    """
-    Đọc dữ liệu từ file văn bản.
-    - Nếu file_path là None: đọc cả 2 file giao dịch và ngân sách mặc định, trả về (transaction_list, budget_list).
-    - Nếu file_path không None: đọc file đó. Nếu file_path chứa "budget" thì nạp Budget, ngược lại nạp Transaction. Trả về LinkedList.
-    """
+
     _ensureDataDir()
     
     if file_path is None:
@@ -156,7 +145,6 @@ def loadDataFromFile(file_path=None):
                         llist.addNode(b)
                 else:
                     if len(parts) >= 6:
-                        # Convert amount safely, handling possible float representation like 100000.0
                         amt = int(float(parts[3]))
                         t = Transaction(
                             trans_id=parts[0],
@@ -174,15 +162,9 @@ def loadDataFromFile(file_path=None):
 
 
 def saveDataToFile(arg1, arg2=None):
-    """
-    Ghi toàn bộ dữ liệu xuống file text.
-    Hỗ trợ 2 signature:
-    1. saveDataToFile(transaction_list, budget_list) -> Ghi xuống các file mặc định
-    2. saveDataToFile(llist, file_path) -> Ghi llist xuống file_path
-    """
+   
     _ensureDataDir()
     
-    # Signature 1: saveDataToFile(transaction_list, budget_list)
     if arg2 is None or isinstance(arg2, LinkedList):
         transaction_list = arg1
         budget_list = arg2 if arg2 is not None else LinkedList()
@@ -190,7 +172,7 @@ def saveDataToFile(arg1, arg2=None):
         ok2 = saveDataToFile(budget_list, DEFAULT_BUDGET_FILE)
         return ok1 and ok2
 
-    # Signature 2: saveDataToFile(llist, file_path)
+
     llist = arg1
     file_path = arg2
     
@@ -202,10 +184,10 @@ def saveDataToFile(arg1, arg2=None):
             while current is not None:
                 d = current.data
                 if is_budget_file:
-                    # Budget format: id|category|limit|month|year
+
                     line = f"{d.id}|{d.category}|{d.limit}|{d.month}|{d.year}\n"
                 else:
-                    # Transaction format: id|date|type|amount|category|note
+                    
                     line = f"{d.id}|{d.date}|{d.type}|{d.amount}|{d.category}|{d.note}\n"
                 file.write(line)
                 current = current.next
