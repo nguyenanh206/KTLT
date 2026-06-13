@@ -1,16 +1,3 @@
-"""
-gui_app.py
-Giao diện Desktop Dashboard - Quản lý Chi tiêu Cá nhân
-Thư viện: CustomTkinter (CTk)
-
-Cách nhúng backend:
-    - Đặt file này cùng thư mục với: models_manager.py, analytics_service.py,
-      budget_checker.py, expense_services.py
-    - Chạy: python gui_app.py
-
-Cài đặt thư viện:
-    pip install customtkinter
-"""
 
 import os
 import customtkinter as ctk
