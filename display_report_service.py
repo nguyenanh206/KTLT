@@ -12,17 +12,11 @@ def printHeader(title):
 def generateMonthlyReport(transaction_list, budget_list, month, year):
     printHeader(f"BÁO CÁO THÁNG {month:02d}/{year}")
 
-    #  Lọc giao dịch trong tháng 
+    #  Lọc giao dịch
     transactions_in_month = []
     current = transaction_list.head
     while current is not None:
         t = current.data
-        try:
-            dt = datetime.strptime(t.date, "%Y-%m-%d")
-            if dt.month == month and dt.year == year:
-                transactions_in_month.append(t)
-        except ValueError:
-            pass
         current = current.next
 
     # Sắp xếp tăng dần theo ngày (Selection sort)
@@ -31,10 +25,11 @@ def generateMonthlyReport(transaction_list, budget_list, month, year):
         for j in range(i+1, len(transactions_in_month)):
             if transactions_in_month[j].date < transactions_in_month[min_idx].date:
                 min_idx = j
-            if min_idx != i:
-                transactions_in_month[i], transactions_in_month[min_idx] = transactions_in_month[min_idx], transactions_in_month[i]
+        if min_idx != i:
+            transactions_in_month[i], transactions_in_month[min_idx] = \
+            transactions_in_month[min_idx], transactions_in_month[i]
 
-    # In danh sách giao dịch (đã sắp xếp) cùng tổng tiền thu, chi và số dư
+    # In danh sách giao dịch
     print(f"\n{'Ngày':<12} {'Loại':<5} {'Danh mục':<14} {'Số tiền':>14}     {'Ghi chú'}")
     printLine()
     total_income = 0.0
@@ -58,7 +53,7 @@ def generateMonthlyReport(transaction_list, budget_list, month, year):
     sign = "+" if balance > 0 else ""
     print(f"{'Số dư:':>43} {' ':>1} {sign}{balance:>13,.0f} VND")
 
-    #  In tỷ lệ chi tiêu theo danh mục
+    #  In tỷ lệ chi tiêu
     print("\n--- TỶ LỆ CHI TIÊU THEO DANH MỤC ---")
     total, ratios = calculateCategoryRatios(transaction_list, month, year)
     if ratios:
@@ -71,9 +66,9 @@ def generateMonthlyReport(transaction_list, budget_list, month, year):
 
     #  In các mục vượt ngân sách
     print("\n--- CẢNH BÁO VƯỢT NGÂN SÁCH ---")
-    exceeded = False
+    over_budget = False
 
-    # Tính tổng chi theo danh mục trong tháng
+    # Tính tổng chi
     cat_names = []
     cat_amounts = []
 
@@ -102,10 +97,10 @@ def generateMonthlyReport(transaction_list, budget_list, month, year):
             if spent > b.limit:
                 over = spent - b.limit
                 print(f"    !!!   {b.category:<14}: Hạn mức {b.limit:>12,.0f}  |  Đã chi {spent:>12,.0f}  |  Vượt {over:>12,.0f} VND")
-                exceeded = True
+                over_budget = True
         current = current.next
         
-    if not exceeded:
+    if not over_budget:
         print("     Không có danh mục nào vượt ngân sách.")
 
     printLine("=")
