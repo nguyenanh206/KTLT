@@ -1,5 +1,4 @@
 
-from decimal import MAX_PREC
 from datetime import datetime
 
 def calculateBalance(transaction_list):
@@ -66,7 +65,7 @@ def calculateCategoryRatios(transaction_list, month = None, year = None):
     return total, result
 
 def searchTransactions(transaction_list, keyword = None, category = None, trans_type = None,
-                        date_from = None, date_to = None, id = None):
+                        date_from = None, date_to = None):
     results = []
     current = transaction_list.head
 
@@ -104,7 +103,7 @@ def searchTransactions(transaction_list, keyword = None, category = None, trans_
 
         current = current.next
 
-    # Sắp xếp giảm dần theo ngày (Selection sort)
+    # Sắp xếp giảm dần theo ngày
     for i in range(len(results) - 1):
         max_idx = i
         for j in range(i+1, len(results)):
