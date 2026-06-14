@@ -1,7 +1,7 @@
 
 from datetime import datetime
 from models_manager import loadDataFromFile, saveDataToFile
-from expense_services import inputTransaction, modifyTransaction, updateBudget, addTransactionWithCheck
+from expense_services import inputTransaction, modifyTransaction, updateBudget, addTransaction
 from analytics_service import searchTransactions
 from display_report_service import (
     generateMonthlyReport, printAllBudgets,
@@ -41,7 +41,7 @@ def run():
         if choice == "1":
             t = inputTransaction()
             if t:
-                addTransactionWithCheck(transaction_list, budget_list, t)
+                addTransaction(transaction_list, budget_list, t)
                 ok = saveDataToFile(transaction_list, budget_list)
                 if ok:
                     print("  ✓ Đã lưu dữ liệu.")
