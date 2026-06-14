@@ -94,7 +94,7 @@ def searchTransactions(transaction_list, keyword = None, category = None, trans_
                         match = False
                 if date_to:
                     dt = datetime.strptime(date_to, "%Y-%m-%d")
-                    if t.date > dt:
+                    if t_date > dt:
                         match = False
             except ValueError:
                 match = False
