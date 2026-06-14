@@ -9,16 +9,10 @@ from models_manager import Budget, Transaction
 _id_counter = 0
 
 
-def _generateId(prefix="T"):
+def _generateId(prefix):
     global _id_counter
     _id_counter += 1
-    try:
-        ts = time.time_ns()
-    except AttributeError:
-        ts = int(time.time() * 1_000_000)
-
-    raw = ts ^ (os.getpid() << 17) ^ (_id_counter * 2654435761)
-    return prefix + format(raw & 0xFFFFFFFF, "08X")
+    return f"{prefix}{_id_counter:04d}"
 
 
 def _categoryByNumber(raw):
@@ -54,7 +48,7 @@ def inputTransaction():
         if choice in ("1", "2"):
             trans_type = "thu" if choice == "1" else "chi"
             break
-        print("  Vui long chon 1 hoac 2.")
+        print("  Chon 1 hoac 2.")
 
     while True:
         raw = input("So tien (VND): ").strip()
@@ -169,7 +163,7 @@ def updateBudget(budget_list, category, limit, month, year):
     return budget_list
 
 
-def addTransactionWithCheck(transaction_list, budget_list, t):
+def addTransaction(transaction_list, budget_list, t):
     if t is None:
         return transaction_list
 
