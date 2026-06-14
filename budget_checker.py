@@ -11,8 +11,8 @@ def checkBudgetExceeded(transaction_list, budget_list, new_transaction):
 
     category = new_transaction.category
 
-    # Tính tổng đã chi cho danh mục này trong tháng
-    spent_so_far = 0.0
+    # Tính tổng đã chi
+    tong_chi = 0.0
     current = transaction_list.head
     while current is not None:
         t = current.data
@@ -20,7 +20,7 @@ def checkBudgetExceeded(transaction_list, budget_list, new_transaction):
             try:
                 t_date = datetime.strptime(t.date, "%Y-%m-%d")
                 if t_date.month == month and t_date.year == year:
-                    spent_so_far += t.amount
+                    tong_chi += t.amount
             except ValueError:
                 pass
         current = current.next
@@ -39,5 +39,5 @@ def checkBudgetExceeded(transaction_list, budget_list, new_transaction):
     if budget_limit is None:
         return False, spent_so_far, 0.0
 
-    exceeded = (spent_so_far + new_transaction.amount) > budget_limit
-    return exceeded, spent_so_far, budget_limit
+    over_budget = (tong_chi + new_transaction.amount) > budget_limit
+    return over_budget, tong_chi, budget_limit
