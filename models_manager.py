@@ -37,7 +37,7 @@ class LinkedList:
         self.head = None
 
     def addNode(self, newData):
-        """Thêm một nút mới vào cuối danh sách"""
+        #Thêm một nút mới vào cuối danh sách
         new_node = Node(newData)
         if self.head is None:
             self.head = new_node
@@ -52,12 +52,12 @@ class LinkedList:
         if self.head is None:
             return False
 
-        # Trường hợp xóa nút đầu
+        # xóa nút đầu
         if self.head.data.id == trans_id:
             self.head = self.head.next
             return True
 
-        # Tìm nút cần xóa ở giữa hoặc cuối
+        # Tìm nút cần xóa 
         temp = self.head
         while temp.next is not None:
             if temp.next.data.id == trans_id:
