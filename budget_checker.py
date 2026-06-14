@@ -37,7 +37,7 @@ def checkBudgetExceeded(transaction_list, budget_list, new_transaction):
 
     # Nếu chưa đặt ngân sách thì không cảnh báo
     if budget_limit is None:
-        return False, spent_so_far, 0.0
+        return False, tong_chi, 0.0
 
     over_budget = (tong_chi + new_transaction.amount) > budget_limit
     return over_budget, tong_chi, budget_limit
