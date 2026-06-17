@@ -11,6 +11,42 @@ _id_counter = 0
 
 def _generateId(prefix):
     global _id_counter
+    if _id_counter == 0:
+        # Tự động quét các tệp dữ liệu để xác định ID lớn nhất hiện tại
+        max_id = 0
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        data_dir = os.path.join(base_dir, "data")
+        trans_file = os.path.join(data_dir, "transactions.txt")
+        budget_file = os.path.join(data_dir, "budgets.txt")
+
+        # Quét file giao dịch
+        if os.path.exists(trans_file):
+            try:
+                with open(trans_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        parts = line.strip().split("|")
+                        if parts and len(parts) > 0:
+                            tid = parts[0].strip()
+                            if len(tid) > 1 and tid[1:].isdigit():
+                                max_id = max(max_id, int(tid[1:]))
+            except Exception:
+                pass
+
+        # Quét file ngân sách
+        if os.path.exists(budget_file):
+            try:
+                with open(budget_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        parts = line.strip().split("|")
+                        if parts and len(parts) > 0:
+                            bid = parts[0].strip()
+                            if len(bid) > 1 and bid[1:].isdigit():
+                                max_id = max(max_id, int(bid[1:]))
+            except Exception:
+                pass
+
+        _id_counter = max_id
+
     _id_counter += 1
     return f"{prefix}{_id_counter:04d}"
 
