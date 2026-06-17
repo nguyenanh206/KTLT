@@ -17,6 +17,12 @@ def generateMonthlyReport(transaction_list, budget_list, month, year):
     current = transaction_list.head
     while current is not None:
         t = current.data
+        try:
+            dt = datetime.strptime(t.date, "%Y-%m-%d")
+            if dt.month == month and dt.year == year:
+                transactions_in_month.append(t)
+        except ValueError:
+            pass
         current = current.next
 
     # Sắp xếp tăng dần theo ngày (Selection sort)
