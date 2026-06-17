@@ -10,7 +10,7 @@ from tkinter import messagebox
 from models_manager   import LinkedList, loadDataFromFile, saveDataToFile
 from models_manager   import Transaction, Budget
 from analytics_service import calculateBalance, calculateCategoryRatios, searchTransactions
-from expense_services  import addTransactionWithCheck, updateBudget, _generateId
+from expense_services  import updateBudget, _generateId
 from budget_checker    import checkBudgetExceeded
 
 # Đường dẫn file dữ liệu
@@ -107,13 +107,13 @@ class EditTransactionPopup(ctk.CTkToplevel):
     def __init__(self, parent, transaction, on_save):
         super().__init__(parent)
         self.title("Sửa giao dịch")
-        self.geometry("400x420")
+        self.geometry("400x490")
         self.resizable(False, False)
         self.grab_set()
         self.configure(fg_color=CLR_BG)
 
         px = parent.winfo_x() + (parent.winfo_width()  - 400) // 2
-        py = parent.winfo_y() + (parent.winfo_height() - 420) // 2
+        py = parent.winfo_y() + (parent.winfo_height() - 490) // 2
         self.geometry(f"+{px}+{py}")
 
         self.transaction = transaction
