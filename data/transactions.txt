@@ -1,19 +1,10 @@
-T3F1A2B5C|2026-05-01|thu|12000000|Luong|Nhan luong thang 5
-T8C2D4E6F|2026-05-15|thu|1500000|Phu cap|Phu cap du an
-T9B0A3F12|2026-06-01|thu|12000000|Luong|Nhan luong thang 6
-T5D7E8F01|2026-06-05|thu|500000|Khac|Ban do cu
-T2A6C4B8E|2026-05-02|chi|3500000|Tien nha|Dong tien phong thang 5
-T7E9F1A3D|2026-05-03|chi|150000|An uong|Di sieu thi
-T0B5D3F7A|2026-05-08|chi|200000|Di lai|Do xang xe may
-T6C8E0A2F|2026-05-10|chi|1200000|Hoc tap|Mua khoa hoc Python
-T4D1C9B7E|2026-05-15|chi|800000|An uong|Lien hoan gia dinh
-T8F2E0D6C|2026-05-20|chi|300000|Giai tri|Xem phim rap
-T1B5D3F7A|2026-05-25|chi|1500000|An uong|An hang thang 5
-T9C8E0A2F|2026-05-28|chi|650000|Di lai|Ve xe ve que
-T3D1C9B7E|2026-06-02|chi|3500000|Tien nha|Dong tien phong thang 6
-T7F2E0D6C|2026-06-03|chi|450000|An uong|Di cho ca tuan
-T5B5D3F7A|2026-06-04|chi|100000|Di lai|Do xang xe
-T2C8E0A2F|2026-06-06|chi|1800000|Giai tri|Mua ve xem ca nhac
-T0D1C9B7E|2026-06-07|chi|500000|Y te|Mua thuoc bo
-T6F2E0D6C|2026-06-09|chi|1200000|An uong|Lien hoan ban be
-T45E193C1|2026-06-09|chi|200000|Khac|Dam tang ho hang
+T0001|2026-06-01|thu|12000000|Luong|Nhan luong thang 6
+T0002|2026-06-02|chi|3500000|Tien nha|Dong tien phong thang 6
+T0004|2026-06-04|chi|100000|Di lai|Do xang xe
+T0005|2026-06-17|thu|10000000|Luong|Nhan luong thang 6
+T0006|2026-06-17|chi|150000|An uong|An trua van phong
+T0008|2026-06-17|chi|850000|An uong|Di cho mua do cho gia dinh
+T0009|2026-06-17|chi|800000|An uong|Lien hoan
+T0010|2026-06-17|chi|350000|An uong|Mua banh keo cung to tien
+T0011|2026-06-17|thu|10000000|Khac|Trung so
+T0012|2026-06-17|chi|150000|Y te|Mua dung cu y te
