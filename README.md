@@ -39,6 +39,8 @@ Dự án môn KTLT_QuanLyChiTieu/
 │   ├── transactions.json             # Lưu cơ sở dữ liệu về lịch sử giao dịch Thu/Chi 
 │   └── budgets.json                  # Lưu cơ sở dữ liệu về hạn mức ngân sách các danh mục [
 │
+├── [test/](file:///c:/Users/acer/OneDrive/Documents/5.KTLT/KTLT/test)                             # Thư mục chứa hình ảnh chụp kết quả kiểm thử thực tế
+│
 ├── models.py                   # Module 1: Định nghĩa cấu trúc dữ liệu tự cài đặt (Thành viên A)
 │                                     # (Cài đặt thủ công Node, Linked List cho Giao dịch & Ngân sách) 
 │
